@@ -54,6 +54,7 @@ public class MessageReader {
     private ConsumerConnector mConsumerConnector;
     private ConsumerIterator mIterator;
     private HashMap<TopicPartition, Long> mLastAccessTime;
+    private int mTopicPartitionForgetSeconds;
 
     public MessageReader(SecorConfig config, OffsetTracker offsetTracker) throws
             UnknownHostException {
@@ -69,6 +70,7 @@ public class MessageReader {
         mIterator = stream.iterator();
         mLastAccessTime = new HashMap<TopicPartition, Long>();
         StatsUtil.setLabel("secor.kafka.consumer.id", IdUtil.getConsumerId());
+        mTopicPartitionForgetSeconds = mConfig.getTopicPartitionForgetSeconds();
     }
 
     private void updateAccessTime(TopicPartition topicPartition) {
@@ -78,7 +80,7 @@ public class MessageReader {
         while (iterator.hasNext()) {
             Map.Entry pair = (Map.Entry) iterator.next();
             long lastAccessTime = (Long) pair.getValue();
-            if (now - lastAccessTime > mConfig.getTopicPartitionForgetSeconds()) {
+            if (now - lastAccessTime > mTopicPartitionForgetSeconds) {
                 iterator.remove();
             }
         }
