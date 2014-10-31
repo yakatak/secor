@@ -125,6 +125,9 @@ public class MessageReader {
         if (mConfig.getFetchMessageMaxBytes() != null && !mConfig.getFetchMessageMaxBytes().isEmpty()) {
             props.put("fetch.message.max.bytes", mConfig.getFetchMessageMaxBytes());
         }
+        if (mConfig.getPartitionAssignmentStrategy() != null && !mConfig.getPartitionAssignmentStrategy().isEmpty()) {
+            props.put("partition.assignment.strategy", mConfig.getPartitionAssignmentStrategy());
+        }
 
         return new ConsumerConfig(props);
     }
