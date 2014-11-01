@@ -18,6 +18,8 @@ package com.pinterest.secor.common;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.reloading.ReloadingStrategy;
+import org.apache.commons.configuration.FileConfiguration;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
@@ -30,6 +32,24 @@ import java.util.Properties;
  */
 public class SecorConfig {
     private final PropertiesConfiguration mProperties;
+
+    private static class NoReloadingStrategy implements ReloadingStrategy {
+      public NoReloadingStrategy() {
+      }
+
+      public void init() {
+      }
+
+      public void setConfiguration(FileConfiguration config) {
+      }
+
+      public boolean reloadingRequired() {
+        return false;
+      }
+
+      public void reloadingPerformed() {
+      }
+    }
 
     private static final ThreadLocal<SecorConfig> mSecorConfig = new ThreadLocal<SecorConfig>() {
 
@@ -49,6 +69,7 @@ public class SecorConfig {
             for (final Map.Entry<Object, Object> entry : systemProperties.entrySet()) {
                 properties.setProperty(entry.getKey().toString(), entry.getValue());
             }
+            properties.setReloadingStrategy(new NoReloadingStrategy());
 
             return new SecorConfig(properties);
         }
