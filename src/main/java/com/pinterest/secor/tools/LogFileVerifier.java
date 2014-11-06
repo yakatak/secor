@@ -62,7 +62,7 @@ public class LogFileVerifier {
         String[] paths = FileUtil.listRecursively(topicPrefix);
         for (String path : paths) {
             if (!path.endsWith("/_SUCCESS")) {
-                LogFilePath logFilePath = new LogFilePath(prefix, path);
+                LogFilePath logFilePath = LogFilePath.createFromPath(prefix, path);
                 TopicPartition topicPartition = new TopicPartition(logFilePath.getTopic(),
                     logFilePath.getKafkaPartition());
                 SortedMap<Long, HashSet<LogFilePath>> offsetToFiles =

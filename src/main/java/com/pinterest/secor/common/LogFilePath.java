@@ -50,6 +50,40 @@ public class LogFilePath {
     private long mOffset;
     private String mExtension;
 
+    public static LogFilePath createFromPath(String prefix, String path) {
+        assert path.startsWith(prefix): path + ".startsWith(" + prefix + ")";
+
+        int prefixLength = prefix.length();
+        if (!prefix.endsWith("/")) {
+            prefixLength++;
+        }
+        String suffix = path.substring(prefixLength);
+        String[] pathElements = suffix.split("/");
+        // Suffix should contain a topic, at least one partition, and the basename.
+        assert pathElements.length >= 3: Arrays.toString(pathElements) + ".length >= 3";
+
+        String topic = pathElements[0];
+        String[] partitions = Arrays.copyOfRange(pathElements, 1, pathElements.length - 1);
+        String extension;
+
+        // Parse basename.
+        String basename = pathElements[pathElements.length - 1];
+        // Remove extension.
+        int lastIndexOf = basename.lastIndexOf('.');
+        if (lastIndexOf >= 0) {
+            extension = basename.substring(lastIndexOf, basename.length());
+            basename = basename.substring(0, lastIndexOf);
+        } else {
+            extension = "";
+        }
+        String[] basenameElements = basename.split("_");
+        assert basenameElements.length == 3: Integer.toString(basenameElements.length) + " == 3";
+        int generation = Integer.parseInt(basenameElements[0]);
+        int kafkaPartition = Integer.parseInt(basenameElements[1]);
+        long offset = Long.parseLong(basenameElements[2]);
+        return new LogFilePath(prefix, topic, partitions, generation, kafkaPartition, offset, extension);
+    }
+
     public LogFilePath(String prefix, int generation, long lastCommittedOffset,
                        ParsedMessage message, String extension) {
         mPrefix = prefix;
@@ -70,48 +104,6 @@ public class LogFilePath {
         mKafkaPartition = kafkaPartition;
         mOffset = offset;
         mExtension = extension;
-    }
-
-    private static String[] subArray(String[] array, int startIndex, int endIndex) {
-        String[] result = new String[endIndex - startIndex + 1];
-        for (int i = startIndex; i <= endIndex; ++i) {
-            result[i - startIndex] = array[i];
-        }
-        return result;
-    }
-
-    public LogFilePath(String prefix, String path) {
-        assert path.startsWith(prefix): path + ".startsWith(" + prefix + ")";
-
-        mPrefix = prefix;
-
-        int prefixLength = prefix.length();
-        if (!prefix.endsWith("/")) {
-            prefixLength++;
-        }
-        String suffix = path.substring(prefixLength);
-        String[] pathElements = suffix.split("/");
-        // Suffix should contain a topic, at least one partition, and the basename.
-        assert pathElements.length >= 3: Arrays.toString(pathElements) + ".length >= 3";
-
-        mTopic = pathElements[0];
-        mPartitions = subArray(pathElements, 1, pathElements.length - 2);
-
-        // Parse basename.
-        String basename = pathElements[pathElements.length - 1];
-        // Remove extension.
-        int lastIndexOf = basename.lastIndexOf('.');
-        if (lastIndexOf >= 0) {
-            mExtension = basename.substring(lastIndexOf, basename.length());
-            basename = basename.substring(0, lastIndexOf);
-        } else {
-            mExtension = "";
-        }
-        String[] basenameElements = basename.split("_");
-        assert basenameElements.length == 3: Integer.toString(basenameElements.length) + " == 3";
-        mGeneration = Integer.parseInt(basenameElements[0]);
-        mKafkaPartition = Integer.parseInt(basenameElements[1]);
-        mOffset = Long.parseLong(basenameElements[2]);
     }
 
     public String getLogFileParentDir() {

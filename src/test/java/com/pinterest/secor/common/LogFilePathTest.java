@@ -58,7 +58,7 @@ public class LogFilePathTest extends TestCase {
     }
 
     public void testConstructFromPath() throws Exception {
-        LogFilePath logFilePath = new LogFilePath("/some_parent_dir", PATH);
+        LogFilePath logFilePath = LogFilePath.createFromPath("/some_parent_dir", PATH);
 
         assertEquals(PATH, logFilePath.getLogFilePath());
         assertEquals(TOPIC, logFilePath.getTopic());
