@@ -49,17 +49,12 @@ public abstract class MessageParser {
     public abstract String[] extractPartitions(Message payload) throws Exception;
 
     protected Partitions extract(Message message) throws Exception {
-        List<String> pathPartitions = new ArrayList<String>(Arrays.asList(extractPartitions(message)));
-        pathPartitions.add(0, message.getTopic());
+        List<String> pathPartitions = Partitions.defaultPathPartitions(message.getTopic(), extractPartitions(message));
         List<String> filenamePartitions = Arrays.asList(extractFilenamePartitions(message));
         return new Partitions(pathPartitions, filenamePartitions);
     }
 
     protected String[] extractFilenamePartitions(Message message) {
-        String[] partitions = new String[3];
-        partitions[0] = Integer.toString(mConfig.getGeneration());
-        partitions[1] = Integer.toString(message.getKafkaPartition());
-        partitions[2] = String.format("%020d", message.getOffset());
-        return partitions;
+        return Partitions.defaultFilenamePartitions(mConfig.getGeneration(), message);
     }
 }

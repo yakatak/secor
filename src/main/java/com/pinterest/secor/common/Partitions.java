@@ -16,10 +16,9 @@
  */
 package com.pinterest.secor.common;
 
-import com.pinterest.secor.message.ParsedMessage;
-import org.apache.commons.lang.StringUtils;
-
+import com.pinterest.secor.message.Message;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Partitions represents ...
@@ -29,6 +28,32 @@ import java.util.List;
 public class Partitions {
     private List<String> mPathPartitions;
     private List<String> mFilenamePartitions;
+
+    public static List<String> defaultPathPartitions(String topic, String[] partitions) {
+        List<String> pathPartitions = new ArrayList<String>(partitions.length + 1);
+        pathPartitions.add(topic);
+        for(String partition : partitions) {
+            pathPartitions.add(partition);
+        }
+        return pathPartitions;
+    }
+
+    public static String defaultOffsetFormat(long offset) {
+        return String.format("%020d", offset);
+    }
+
+    public static String[] defaultFilenamePartitions(int generation, Message message) {
+        return defaultFilenamePartitions(generation, message.getKafkaPartition(), message.getOffset());
+    }
+
+    public static String[] defaultFilenamePartitions(int generation, int partition, long offset) {
+        String[] partitions = {
+            Integer.toString(generation),
+            Integer.toString(partition),
+            defaultOffsetFormat(offset)
+        };
+        return partitions;
+    }
 
     public Partitions(List<String> pathPartitions, List<String> filenamePartitions) {
         mPathPartitions = pathPartitions;
