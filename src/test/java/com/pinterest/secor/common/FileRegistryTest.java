@@ -160,7 +160,7 @@ public class FileRegistryTest extends TestCase {
         Collection<LogFilePath> logFilePaths = mRegistry
                 .getPaths(topicPartition);
         assertEquals(1, logFilePaths.size());
-        assertTrue(logFilePaths.contains(mLogFilePath));
+        assertTrue(logFilePaths.contains(mLogFilePathGz));
     }
 
     public void testDeletePath() throws Exception {

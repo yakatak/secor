@@ -17,8 +17,13 @@
 package com.pinterest.secor.parser;
 
 import com.pinterest.secor.common.SecorConfig;
+import com.pinterest.secor.common.Partitions;
 import com.pinterest.secor.message.Message;
 import com.pinterest.secor.message.ParsedMessage;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 // TODO(pawel): should we offer a multi-message parser capable of parsing multiple types of
 // messages?  E.g., it could be implemented as a composite trying out different parsers and using
@@ -37,10 +42,24 @@ public abstract class MessageParser {
     }
 
     public ParsedMessage parse(Message message) throws Exception {
-        String[] partitions = extractPartitions(message);
         return new ParsedMessage(message.getTopic(), message.getKafkaPartition(),
-                                 message.getOffset(), message.getPayload(), partitions);
+                                 message.getOffset(), message.getPayload(), extract(message));
     }
 
     public abstract String[] extractPartitions(Message payload) throws Exception;
+
+    protected Partitions extract(Message message) throws Exception {
+        List<String> pathPartitions = new ArrayList<String>(Arrays.asList(extractPartitions(message)));
+        pathPartitions.add(0, message.getTopic());
+        List<String> filenamePartitions = Arrays.asList(extractFilenamePartitions(message));
+        return new Partitions(pathPartitions, filenamePartitions);
+    }
+
+    protected String[] extractFilenamePartitions(Message message) {
+        String[] partitions = new String[3];
+        partitions[0] = Integer.toString(mConfig.getGeneration());
+        partitions[1] = Integer.toString(message.getKafkaPartition());
+        partitions[2] = String.format("%020d", message.getOffset());
+        return partitions;
+    }
 }
