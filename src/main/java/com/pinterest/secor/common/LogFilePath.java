@@ -86,15 +86,6 @@ public class LogFilePath {
         return new LogFilePath(prefix, topic, partitions, generation, kafkaPartition, offset, extension);
     }
 
-    public LogFilePath(String prefix, int generation, long lastCommittedOffset,
-                       ParsedMessage message, String extension) {
-        mPrefix = prefix;
-        mTopic = message.getTopic();
-        mPartitions = message.getPartitions();
-        mGeneration = generation;
-        mKafkaPartition = message.getKafkaPartition();
-        mOffset = lastCommittedOffset;
-        mExtension = extension;
     }
 
     public LogFilePath(String prefix, String topic, Partitions partitions, int generation,
@@ -106,6 +97,12 @@ public class LogFilePath {
         mKafkaPartition = kafkaPartition;
         mOffset = offset;
         mExtension = extension;
+    }
+
+    public LogFilePath(String prefix, int generation, long lastCommittedOffset,
+                       ParsedMessage message, String extension) {
+        this(prefix, message.getTopic(), message.getPartitions(), generation,
+             message.getKafkaPartition(), lastCommittedOffset, extension);
     }
 
     public String getLogFileParentDir() {
