@@ -33,7 +33,7 @@ public class LogFilePathTest extends TestCase {
     private static final int KAFKA_PARTITION = 0;
     private static final long LAST_COMMITTED_OFFSET = 100;
     private static final String[] PATH_PARTITIONS = {TOPIC, "some_partition", "some_other_partition"};
-    private static final String[] NAME_PARTITIONS = Partitions.defaultFilenamePartitions(GENERATION, KAFKA_PARTITION, LAST_COMMITTED_OFFSET);
+    private static final String[] NAME_PARTITIONS = Partitions.defaultFilenamePartitions(GENERATION, KAFKA_PARTITION);
     private static final String PATH =
         "/some_parent_dir/some_topic/some_partition/some_other_partition/" +
         "10_0_00000000000000000100";

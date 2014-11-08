@@ -19,6 +19,7 @@ package com.pinterest.secor.common;
 import com.pinterest.secor.message.Message;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Partitions represents ...
@@ -32,25 +33,14 @@ public class Partitions {
     public static List<String> defaultPathPartitions(String topic, String[] partitions) {
         List<String> pathPartitions = new ArrayList<String>(partitions.length + 1);
         pathPartitions.add(topic);
-        for(String partition : partitions) {
-            pathPartitions.add(partition);
-        }
+        pathPartitions.addAll(Arrays.asList(partitions));
         return pathPartitions;
     }
 
-    public static String defaultOffsetFormat(long offset) {
-        return String.format("%020d", offset);
-    }
-
-    public static String[] defaultFilenamePartitions(int generation, Message message) {
-        return defaultFilenamePartitions(generation, message.getKafkaPartition(), message.getOffset());
-    }
-
-    public static String[] defaultFilenamePartitions(int generation, int partition, long offset) {
+    public static String[] defaultFilenamePartitions(int generation, int partition) {
         String[] partitions = {
             Integer.toString(generation),
-            Integer.toString(partition),
-            defaultOffsetFormat(offset)
+            Integer.toString(partition)
         };
         return partitions;
     }
@@ -75,8 +65,8 @@ public class Partitions {
 
         Partitions that = (Partitions) o;
 
-        return (mPathPartitions.equals(that.getPathPartitions())) &&
-          (mFilenamePartitions.equals(that.getFilenamePartitions()));
+        return mPathPartitions.equals(that.getPathPartitions()) &&
+          mFilenamePartitions.equals(that.getFilenamePartitions());
     }
 
     @Override

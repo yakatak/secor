@@ -55,6 +55,6 @@ public abstract class MessageParser {
     }
 
     protected String[] extractFilenamePartitions(Message message) {
-        return Partitions.defaultFilenamePartitions(mConfig.getGeneration(), message);
+        return Partitions.defaultFilenamePartitions(mConfig.getGeneration(), message.getKafkaPartition());
     }
 }

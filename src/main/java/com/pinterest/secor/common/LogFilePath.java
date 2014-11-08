@@ -77,15 +77,18 @@ public class LogFilePath {
         } else {
             extension = "";
         }
-        List<String> basenameElements = Arrays.asList(basename.split("_"));
-        Partitions partitions = new Partitions(pathPartitions, basenameElements);
+        List<String> basenameElements = new ArrayList<String>(Arrays.asList(basename.split("_")));
         assert basenameElements.size() == 3: Integer.toString(basenameElements.size()) + " == 3";
         int generation = Integer.parseInt(basenameElements.get(0));
         int kafkaPartition = Integer.parseInt(basenameElements.get(1));
         long offset = Long.parseLong(basenameElements.get(2));
+        basenameElements.remove(basenameElements.size() - 1);
+        Partitions partitions = new Partitions(pathPartitions, basenameElements);
         return new LogFilePath(prefix, topic, partitions, generation, kafkaPartition, offset, extension);
     }
 
+    public static String defaultOffsetFormat(long offset) {
+        return String.format("%020d", offset);
     }
 
     public LogFilePath(String prefix, String topic, Partitions partitions, int generation,
