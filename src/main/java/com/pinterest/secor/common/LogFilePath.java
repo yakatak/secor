@@ -118,12 +118,6 @@ public class LogFilePath {
         return StringUtils.join(elements, "/");
     }
 
-    private String getLogFileBasename() {
-        List<String> basenameElements = new ArrayList<String>();
-        basenameElements.addAll(mPartitions.getFilenamePartitions());
-        return StringUtils.join(basenameElements, "_");
-    }
-
     public String getLogFilePath() {
         List<String> pathElements = new ArrayList<String>();
         pathElements.add(getLogFileDir());
@@ -194,5 +188,12 @@ public class LogFilePath {
     @Override
     public String toString() {
         return getLogFilePath();
+    }
+
+    private String getLogFileBasename() {
+        List<String> basenameElements = new ArrayList<String>();
+        basenameElements.addAll(mPartitions.getFilenamePartitions());
+        basenameElements.add(defaultOffsetFormat(mOffset));
+        return StringUtils.join(basenameElements, "_");
     }
 }
