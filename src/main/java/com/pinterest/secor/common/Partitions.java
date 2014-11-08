@@ -39,8 +39,7 @@ public class Partitions {
 
     public static String[] defaultFilenamePartitions(int generation, int partition) {
         String[] partitions = {
-            Integer.toString(generation),
-            Integer.toString(partition)
+            Integer.toString(generation)
         };
         return partitions;
     }

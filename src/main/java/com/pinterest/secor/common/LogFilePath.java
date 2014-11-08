@@ -82,8 +82,7 @@ public class LogFilePath {
         int generation = Integer.parseInt(basenameElements.get(0));
         int kafkaPartition = Integer.parseInt(basenameElements.get(1));
         long offset = Long.parseLong(basenameElements.get(2));
-        basenameElements.remove(basenameElements.size() - 1);
-        Partitions partitions = new Partitions(pathPartitions, basenameElements);
+        Partitions partitions = new Partitions(pathPartitions, basenameElements.subList(0, 1));
         return new LogFilePath(prefix, topic, partitions, generation, kafkaPartition, offset, extension);
     }
 
@@ -196,6 +195,7 @@ public class LogFilePath {
     private String getLogFileBasename() {
         List<String> basenameElements = new ArrayList<String>();
         basenameElements.addAll(mPartitions.getFilenamePartitions());
+        basenameElements.add(Integer.toString(mKafkaPartition));
         basenameElements.add(defaultOffsetFormat(mOffset));
         return StringUtils.join(basenameElements, "_");
     }
