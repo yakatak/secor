@@ -223,6 +223,10 @@ public class SecorConfig {
     	return getString("secor.kafka.perf_topic_prefix");
     }
 
+    public String getLogFilePathDelimiter() {
+        return mProperties.getString("secor.log.file.path.delimiter", "_");
+    }
+
     private void checkProperty(String name) {
         if (!mProperties.containsKey(name)) {
             throw new RuntimeException("Failed to find required configuration option '" +

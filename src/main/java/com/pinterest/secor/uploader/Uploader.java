@@ -71,7 +71,8 @@ public class Uploader {
                                              localPath.getGeneration(),
                                              localPath.getKafkaPartition(),
                                              localPath.getOffset(),
-                                             localPath.getExtension());
+                                             localPath.getExtension(),
+                                             localPath.getDelimiter());
         final String localLogFilename = localPath.getLogFilePath();
         final String s3LogFilename = s3Path.getLogFilePath();
         LOG.info("uploading file " + localLogFilename + " to " + s3LogFilename);
@@ -158,7 +159,8 @@ public class Uploader {
                         dstPath = new LogFilePath(localPrefix, srcPath.getTopic(),
                                                   srcPath.getPartitions(), srcPath.getGeneration(),
                                                   srcPath.getKafkaPartition(), startOffset,
-                                                  extension);
+                                                  extension,
+                                                  srcPath.getDelimiter());
                         writer = mFileRegistry.getOrCreateWriter(dstPath,
                         		codec);
                     }

@@ -43,6 +43,7 @@ import java.util.Arrays;
  * @author Pawel Garbacki (pawel@pinterest.com)
  */
 public class LogFilePath {
+    private static final String DEFAULT_DELIMITER = "_";
     private String mPrefix;
     private String mTopic;
     private Partitions mPartitions;
@@ -50,8 +51,9 @@ public class LogFilePath {
     private int mKafkaPartition;
     private long mOffset;
     private String mExtension;
+    private String mDelimiter;
 
-    public static LogFilePath createFromPath(String prefix, String path) {
+    public static LogFilePath createFromPath(String prefix, String path, String delimiter) {
         assert path.startsWith(prefix): path + ".startsWith(" + prefix + ")";
 
         int prefixLength = prefix.length();
@@ -77,13 +79,17 @@ public class LogFilePath {
         } else {
             extension = "";
         }
-        List<String> basenameElements = new ArrayList<String>(Arrays.asList(basename.split("_")));
+        List<String> basenameElements = new ArrayList<String>(Arrays.asList(basename.split(delimiter)));
         assert basenameElements.size() == 3: Integer.toString(basenameElements.size()) + " == 3";
         int generation = Integer.parseInt(basenameElements.get(0));
         int kafkaPartition = Integer.parseInt(basenameElements.get(1));
         long offset = Long.parseLong(basenameElements.get(2));
         Partitions partitions = new Partitions(pathPartitions, basenameElements.subList(0, 1));
-        return new LogFilePath(prefix, topic, partitions, generation, kafkaPartition, offset, extension);
+        return new LogFilePath(prefix, topic, partitions, generation, kafkaPartition, offset, extension, delimiter);
+    }
+
+    public static LogFilePath createFromPath(String prefix, String path) {
+      return createFromPath(prefix, path, DEFAULT_DELIMITER);
     }
 
     public static String defaultOffsetFormat(long offset) {
@@ -91,7 +97,7 @@ public class LogFilePath {
     }
 
     public LogFilePath(String prefix, String topic, Partitions partitions, int generation,
-                       int kafkaPartition, long offset, String extension) {
+                       int kafkaPartition, long offset, String extension, String delimiter) {
         mPrefix = prefix;
         mTopic = topic;
         mPartitions = partitions;
@@ -99,12 +105,24 @@ public class LogFilePath {
         mKafkaPartition = kafkaPartition;
         mOffset = offset;
         mExtension = extension;
+        mDelimiter = delimiter;
+    }
+
+    public LogFilePath(String prefix, String topic, Partitions partitions, int generation,
+                       int kafkaPartition, long offset, String extension) {
+        this(prefix, topic, partitions, generation, kafkaPartition, offset, extension, DEFAULT_DELIMITER);
     }
 
     public LogFilePath(String prefix, int generation, long lastCommittedOffset,
                        ParsedMessage message, String extension) {
         this(prefix, message.getTopic(), message.getPartitions(), generation,
-             message.getKafkaPartition(), lastCommittedOffset, extension);
+             message.getKafkaPartition(), lastCommittedOffset, extension, DEFAULT_DELIMITER);
+    }
+
+    public LogFilePath(String prefix, int generation, long lastCommittedOffset,
+                       ParsedMessage message, String extension, String delimiter) {
+        this(prefix, message.getTopic(), message.getPartitions(), generation,
+             message.getKafkaPartition(), lastCommittedOffset, extension, delimiter);
     }
 
     public String getLogFileParentDir() {
@@ -159,6 +177,10 @@ public class LogFilePath {
         return mExtension;
     }
 
+    public String getDelimiter() {
+        return mDelimiter;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -197,6 +219,6 @@ public class LogFilePath {
         basenameElements.addAll(mPartitions.getFilenamePartitions());
         basenameElements.add(Integer.toString(mKafkaPartition));
         basenameElements.add(defaultOffsetFormat(mOffset));
-        return StringUtils.join(basenameElements, "_");
+        return StringUtils.join(basenameElements, mDelimiter);
     }
 }
