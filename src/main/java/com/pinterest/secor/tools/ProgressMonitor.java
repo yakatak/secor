@@ -25,20 +25,12 @@ import com.pinterest.secor.common.ZookeeperConnector;
 import com.pinterest.secor.message.Message;
 import com.pinterest.secor.parser.MessageParser;
 import com.pinterest.secor.parser.TimestampedMessageParser;
+import com.pinterest.secor.stats.StatsReporter;
+import com.pinterest.secor.stats.ReporterFactory;
+import com.pinterest.secor.stats.Stat;
 import com.pinterest.secor.util.ReflectionUtil;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +45,7 @@ public class ProgressMonitor {
     private ZookeeperConnector mZookeeperConnector;
     private KafkaClient mKafkaClient;
     private MessageParser mMessageParser;
+    private List<StatsReporter> mStatsReporters;
 
     public ProgressMonitor(SecorConfig config)
             throws Exception
@@ -62,63 +55,13 @@ public class ProgressMonitor {
         mKafkaClient = new KafkaClient(mConfig);
         mMessageParser = (MessageParser) ReflectionUtil.createMessageParser(
                 mConfig.getMessageParserClass(), mConfig);
-    }
-
-    private void makeRequest(String body) throws IOException {
-        URL url = new URL("http://" + mConfig.getTsdbHostport() + "/api/put?details");
-        HttpURLConnection connection = null;
-        try {
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("Accepts", "application/json");
-            connection.setRequestProperty("Accept", "*/*");
-            if (body != null) {
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Length",
-                        Integer.toString(body.getBytes().length));
-            }
-            connection.setUseCaches (false);
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-
-            if (body != null) {
-                // Send request.
-                DataOutputStream dataOutputStream = new DataOutputStream(
-                    connection.getOutputStream());
-                dataOutputStream.writeBytes(body);
-                dataOutputStream.flush();
-                dataOutputStream.close();
-            }
-
-            // Get Response.
-            InputStream inputStream = connection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            Map response = (Map) JSONValue.parse(reader);
-            if (!response.get("failed").equals(0)) {
-                throw new RuntimeException("url " + url + " with body " + body + " failed " +
-                    JSONObject.toJSONString(response));
-            }
-        } catch (IOException exception) {
-            if (connection != null) {
-                connection.disconnect();
-            }
-            throw exception;
-        }
-    }
-
-    private void exportToTsdb(Stat stat)
-            throws IOException {
-        LOG.info("exporting metric to tsdb " + stat);
-        makeRequest(stat.toString());
+        mStatsReporters = ReporterFactory.createReporters(mConfig.getStatsConfig());
     }
 
     public void exportStats() throws Exception {
         List<Stat> stats = getStats();
-        System.out.println(JSONArray.toJSONString(stats));
-        if (mConfig.getTsdbHostport() != null && !mConfig.getTsdbHostport().isEmpty()) {
-            for (Stat stat : stats) {
-                exportToTsdb(stat);
-            }
+        for(StatsReporter reporter : mStatsReporters) {
+            reporter.report(stats);
         }
     }
 
@@ -127,7 +70,7 @@ public class ProgressMonitor {
         List<Stat> stats = Lists.newArrayList();
 
         for (String topic : topics) {
-            if (topic.matches(mConfig.getTsdbBlacklistTopics()) ||
+            if (topic.matches(mConfig.getMonitoringBlacklistTopics()) ||
                     !topic.matches(mConfig.getKafkaTopicFilter())) {
                 LOG.info("skipping topic " + topic);
                 continue;
@@ -182,22 +125,6 @@ public class ProgressMonitor {
             return ((TimestampedMessageParser)mMessageParser).extractTimestampMillis(message);
         } else {
             return -1;
-        }
-    }
-
-    private static class Stat extends JSONObject {
-
-        public static Stat createInstance(String metric, Map<String, String> tags, String value, long timestamp) {
-            return new Stat(ImmutableMap.of(
-                    "metric", metric,
-                    "tags", tags,
-                    "value", value,
-                    "timestamp", timestamp
-            ));
-        }
-
-        public Stat(Map<String, Object> map) {
-            super(map);
         }
     }
 }

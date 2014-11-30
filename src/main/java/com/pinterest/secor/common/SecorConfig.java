@@ -18,9 +18,12 @@ package com.pinterest.secor.common;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.Properties;
 
 /**
@@ -183,14 +186,6 @@ public class SecorConfig {
         return getString("qubole.api.token");
     }
 
-    public String getTsdbHostport() {
-        return getString("tsdb.hostport");
-    }
-
-    public String getTsdbBlacklistTopics() {
-        return getString("tsdb.blacklist.topics");
-    }
-
     public String getMessageTimestampName() {
         return getString("message.timestamp.name");
     }
@@ -206,13 +201,21 @@ public class SecorConfig {
     public int getMaxMessageSizeBytes() {
         return getInt("secor.max.message.size.bytes");
     }
-    
+
     public String getFileReaderWriter() {
     	return getString("secor.file.reader.writer");
     }
-    
+
     public String getPerfTestTopicPrefix() {
     	return getString("secor.kafka.perf_topic_prefix");
+    }
+
+    public Configuration getStatsConfig() {
+        return mProperties.subset("secor.stats");
+    }
+
+    public String getMonitoringBlacklistTopics() {
+        return mProperties.getString("monitoring.blacklist.topics", "");
     }
 
     private void checkProperty(String name) {
