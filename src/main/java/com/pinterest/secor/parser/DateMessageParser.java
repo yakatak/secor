@@ -37,7 +37,7 @@ import com.pinterest.secor.message.Message;
  * @author Lucas Zago (lucaszago@gmail.com)
  * 
  */
-public class DateMessageParser extends MessageParser {
+public class DateMessageParser extends AbstractMessageParser {
     private static final Logger LOG = LoggerFactory.getLogger(DateMessageParser.class);
     protected static final String defaultDate = "dt=1970-01-01";
     protected static final String defaultFormatter = "yyyy-MM-dd";

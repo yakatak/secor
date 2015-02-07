@@ -24,7 +24,7 @@ import com.pinterest.secor.message.Message;
  *
  * @author Pawel Garbacki (pawel@pinterest.com)
  */
-public class OffsetMessageParser extends MessageParser {
+public class OffsetMessageParser extends AbstractMessageParser {
     public OffsetMessageParser(SecorConfig config) {
         super(config);
     }
