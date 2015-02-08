@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public abstract class TimestampedMessageParser extends MessageParser {
+public abstract class TimestampedMessageParser extends AbstractMessageParser {
 
     private SimpleDateFormat mFormatter;
 

@@ -81,7 +81,7 @@ public class UploaderTest extends TestCase {
         super.setUp();
         mTopicPartition = new TopicPartition("some_topic", 0);
 
-        mLogFilePath = new LogFilePath("/some_parent_dir",
+        mLogFilePath = LogFilePath.createFromPath("/some_parent_dir",
                 "/some_parent_dir/some_topic/some_partition/some_other_partition/"
                         + "10_0_00000000000000000010");
 
@@ -196,7 +196,7 @@ public class UploaderTest extends TestCase {
                 .thenReturn("some_message_dir");
 
         FileWriter writer = Mockito.mock(FileWriter.class);
-        LogFilePath dstLogFilePath = new LogFilePath(
+        LogFilePath dstLogFilePath = LogFilePath.createFromPath(
                 "/some_parent_dir/some_message_dir",
                 "/some_parent_dir/some_message_dir/some_topic/some_partition/"
                         + "some_other_partition/10_0_00000000000000000021");

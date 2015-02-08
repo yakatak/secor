@@ -16,7 +16,8 @@
  */
 package com.pinterest.secor.message;
 
-import java.lang.String;
+import com.pinterest.secor.common.Partitions;
+
 import java.util.Arrays;
 
 /**
@@ -26,21 +27,21 @@ import java.util.Arrays;
  * @author Pawel Garbacki (pawel@pinterest.com)
  */
 public class ParsedMessage extends Message {
-    private String[] mPartitions;
+    private Partitions mPartitions;
 
     @Override
     public String toString() {
         return "ParsedMessage{" + fieldsToString() +  ", mPartitions=" +
-               Arrays.toString(mPartitions) + '}';
+               Arrays.toString(mPartitions.getPathPartitions().toArray()) + '}';
     }
 
     public ParsedMessage(String topic, int kafkaPartition, long offset, byte[] payload,
-                         String[] mPartitions) {
+                         Partitions mPartitions) {
         super(topic, kafkaPartition, offset, payload);
         this.mPartitions = mPartitions;
     }
 
-    public String[] getPartitions() {
+    public Partitions getPartitions() {
         return mPartitions;
     }
 }

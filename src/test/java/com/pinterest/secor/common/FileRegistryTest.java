@@ -59,9 +59,9 @@ public class FileRegistryTest extends TestCase {
                 "com.pinterest.secor.io.impl.SequenceFileReaderWriterFactory");
         SecorConfig secorConfig = new SecorConfig(properties);
         mRegistry = new FileRegistry(secorConfig);
-        mLogFilePath = new LogFilePath("/some_parent_dir", PATH);
+        mLogFilePath = LogFilePath.createFromPath("/some_parent_dir", PATH);
         mTopicPartition = new TopicPartition("some_topic", 0);
-        mLogFilePathGz = new LogFilePath("/some_parent_dir", PATH_GZ);
+        mLogFilePathGz = LogFilePath.createFromPath("/some_parent_dir", PATH_GZ);
     }
 
     private void createWriter() throws Exception {
@@ -160,7 +160,7 @@ public class FileRegistryTest extends TestCase {
         Collection<LogFilePath> logFilePaths = mRegistry
                 .getPaths(topicPartition);
         assertEquals(1, logFilePaths.size());
-        assertTrue(logFilePaths.contains(mLogFilePath));
+        assertTrue(logFilePaths.contains(mLogFilePathGz));
     }
 
     public void testDeletePath() throws Exception {

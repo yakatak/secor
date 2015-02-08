@@ -81,7 +81,7 @@ public class MessageWriter {
                                                            message.getKafkaPartition());
         long offset = mOffsetTracker.getAdjustedCommittedOffsetCount(topicPartition);
         LogFilePath path = new LogFilePath(mLocalPrefix, mConfig.getGeneration(), offset, message,
-        		mFileExtension);
+        		mFileExtension, mConfig.getLogFilePathDelimiter());
         FileWriter writer = mFileRegistry.getOrCreateWriter(path, mCodec);
         writer.write(new KeyValue(message.getOffset(), message.getPayload()));
         LOG.debug("appended message " + message + " to file " + path.getLogFilePath() +

@@ -68,8 +68,8 @@ public class FileReaderWriterFactoryTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mLogFilePath = new LogFilePath("/some_parent_dir", PATH);
-        mLogFilePathGz = new LogFilePath("/some_parent_dir", PATH_GZ);
+        mLogFilePath = LogFilePath.createFromPath("/some_parent_dir", PATH);
+        mLogFilePathGz = LogFilePath.createFromPath("/some_parent_dir", PATH_GZ);
     }
 
     private void setupSequenceFileReaderConfig() {
