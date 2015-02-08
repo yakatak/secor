@@ -50,6 +50,8 @@ public class Uploader {
     private OffsetTracker mOffsetTracker;
     private FileRegistry mFileRegistry;
     private ZookeeperConnector mZookeeperConnector;
+    private long mMaxFileSizeBytes;
+    private long mMaxFileAgeSeconds;
 
     public Uploader(SecorConfig config, OffsetTracker offsetTracker, FileRegistry fileRegistry) {
         this(config, offsetTracker, fileRegistry, new ZookeeperConnector(config));
@@ -62,6 +64,8 @@ public class Uploader {
         mOffsetTracker = offsetTracker;
         mFileRegistry = fileRegistry;
         mZookeeperConnector = zookeeperConnector;
+        mMaxFileSizeBytes = mConfig.getMaxFileSizeBytes();
+        mMaxFileAgeSeconds = mConfig.getMaxFileAgeSeconds();
     }
 
     private Future<?> upload(LogFilePath localPath) throws Exception {
@@ -190,8 +194,7 @@ public class Uploader {
     private void checkTopicPartition(TopicPartition topicPartition) throws Exception {
         final long size = mFileRegistry.getSize(topicPartition);
         final long modificationAgeSec = mFileRegistry.getModificationAgeSec(topicPartition);
-        if (size >= mConfig.getMaxFileSizeBytes() ||
-                modificationAgeSec >= mConfig.getMaxFileAgeSeconds()) {
+        if (size >= mMaxFileSizeBytes || modificationAgeSec >= mMaxFileAgeSeconds) {
             long newOffsetCount = mZookeeperConnector.getCommittedOffsetCount(topicPartition);
             long oldOffsetCount = mOffsetTracker.setCommittedOffsetCount(topicPartition,
                     newOffsetCount);
