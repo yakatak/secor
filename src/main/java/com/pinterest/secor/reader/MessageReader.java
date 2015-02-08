@@ -133,6 +133,9 @@ public class MessageReader {
         if (mConfig.getFetchWaitMaxMs() != null && !mConfig.getFetchWaitMaxMs().isEmpty()) {
             props.put("fetch.wait.max.ms", mConfig.getFetchWaitMaxMs());
         }
+        if (mConfig.getPartitionAssignmentStrategy() != null && !mConfig.getPartitionAssignmentStrategy().isEmpty()) {
+            props.put("partition.assignment.strategy", mConfig.getPartitionAssignmentStrategy());
+        }
 
         return new ConsumerConfig(props);
     }

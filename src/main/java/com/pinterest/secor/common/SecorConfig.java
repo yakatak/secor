@@ -132,6 +132,10 @@ public class SecorConfig {
         return getString("kafka.fetch.wait.max.ms");
     }
 
+    public String getPartitionAssignmentStrategy() {
+      return getString("kafka.partition.assignment.strategy");
+    }
+
     public int getGeneration() {
         return getInt("secor.generation");
     }
