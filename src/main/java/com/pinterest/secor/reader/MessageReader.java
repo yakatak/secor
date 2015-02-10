@@ -53,8 +53,6 @@ public class MessageReader {
     private OffsetTracker mOffsetTracker;
     private ConsumerConnector mConsumerConnector;
     private ConsumerIterator mIterator;
-    private HashMap<TopicPartition, Long> mLastAccessTime;
-    private int mTopicPartitionForgetSeconds;
 
     public MessageReader(SecorConfig config, OffsetTracker offsetTracker) throws
             UnknownHostException {
@@ -68,34 +66,7 @@ public class MessageReader {
             mConsumerConnector.createMessageStreamsByFilter(topicFilter);
         KafkaStream<byte[], byte[]> stream = streams.get(0);
         mIterator = stream.iterator();
-        mLastAccessTime = new HashMap<TopicPartition, Long>();
         StatsUtil.setLabel("secor.kafka.consumer.id", IdUtil.getConsumerId());
-        mTopicPartitionForgetSeconds = mConfig.getTopicPartitionForgetSeconds();
-    }
-
-    private void updateAccessTime(TopicPartition topicPartition) {
-        long now = System.currentTimeMillis() / 1000L;
-        mLastAccessTime.put(topicPartition, now);
-        Iterator iterator = mLastAccessTime.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry pair = (Map.Entry) iterator.next();
-            long lastAccessTime = (Long) pair.getValue();
-            if (now - lastAccessTime > mTopicPartitionForgetSeconds) {
-                iterator.remove();
-            }
-        }
-    }
-
-    private void exportStats() {
-        StringBuffer topicPartitions = new StringBuffer();
-        for (TopicPartition topicPartition : mLastAccessTime.keySet()) {
-            if (topicPartitions.length() > 0) {
-                topicPartitions.append(' ');
-            }
-            topicPartitions.append(topicPartition.getTopic() + '/' +
-                                   topicPartition.getPartition());
-        }
-        StatsUtil.setLabel("secor.topic_partitions", topicPartitions.toString());
     }
 
     private ConsumerConfig createConsumerConfig() throws UnknownHostException {
@@ -152,11 +123,9 @@ public class MessageReader {
                                       kafkaMessage.offset(), kafkaMessage.message());
         TopicPartition topicPartition = new TopicPartition(message.getTopic(),
                                                            message.getKafkaPartition());
-        updateAccessTime(topicPartition);
         // Skip already committed messages.
         long committedOffsetCount = mOffsetTracker.getTrueCommittedOffsetCount(topicPartition);
         LOG.debug("read message" + message);
-        exportStats();
         if (message.getOffset() < committedOffsetCount) {
             LOG.debug("skipping message message " + message + " because its offset precedes " +
                       "committed offset count " + committedOffsetCount);
