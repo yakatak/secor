@@ -53,7 +53,6 @@ public class MessageReader {
     private OffsetTracker mOffsetTracker;
     private ConsumerConnector mConsumerConnector;
     private ConsumerIterator mIterator;
-    private HashMap<TopicPartition, Long> mLastAccessTime;
 
     public MessageReader(SecorConfig config, OffsetTracker offsetTracker) throws
             UnknownHostException {
@@ -67,21 +66,7 @@ public class MessageReader {
             mConsumerConnector.createMessageStreamsByFilter(topicFilter);
         KafkaStream<byte[], byte[]> stream = streams.get(0);
         mIterator = stream.iterator();
-        mLastAccessTime = new HashMap<TopicPartition, Long>();
         StatsUtil.setLabel("secor.kafka.consumer.id", IdUtil.getConsumerId());
-    }
-
-    private void updateAccessTime(TopicPartition topicPartition) {
-        long now = System.currentTimeMillis() / 1000L;
-        mLastAccessTime.put(topicPartition, now);
-        Iterator iterator = mLastAccessTime.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry pair = (Map.Entry) iterator.next();
-            long lastAccessTime = (Long) pair.getValue();
-            if (now - lastAccessTime > mConfig.getTopicPartitionForgetSeconds()) {
-                iterator.remove();
-            }
-        }
     }
 
     private ConsumerConfig createConsumerConfig() throws UnknownHostException {
@@ -129,7 +114,6 @@ public class MessageReader {
                                       kafkaMessage.offset(), kafkaMessage.message());
         TopicPartition topicPartition = new TopicPartition(message.getTopic(),
                                                            message.getKafkaPartition());
-        updateAccessTime(topicPartition);
         // Skip already committed messages.
         long committedOffsetCount = mOffsetTracker.getTrueCommittedOffsetCount(topicPartition);
         LOG.debug("read message" + message);
