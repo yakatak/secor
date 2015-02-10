@@ -84,18 +84,6 @@ public class MessageReader {
         }
     }
 
-    private void exportStats() {
-        StringBuffer topicPartitions = new StringBuffer();
-        for (TopicPartition topicPartition : mLastAccessTime.keySet()) {
-            if (topicPartitions.length() > 0) {
-                topicPartitions.append(' ');
-            }
-            topicPartitions.append(topicPartition.getTopic() + '/' +
-                                   topicPartition.getPartition());
-        }
-        StatsUtil.setLabel("secor.topic_partitions", topicPartitions.toString());
-    }
-
     private ConsumerConfig createConsumerConfig() throws UnknownHostException {
         Properties props = new Properties();
         props.put("zookeeper.connect", mConfig.getZookeeperQuorum() + mConfig.getKafkaZookeeperPath());
@@ -145,7 +133,6 @@ public class MessageReader {
         // Skip already committed messages.
         long committedOffsetCount = mOffsetTracker.getTrueCommittedOffsetCount(topicPartition);
         LOG.debug("read message" + message);
-        exportStats();
         if (message.getOffset() < committedOffsetCount) {
             LOG.debug("skipping message message " + message + " because its offset precedes " +
                       "committed offset count " + committedOffsetCount);
