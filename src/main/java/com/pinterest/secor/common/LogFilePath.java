@@ -191,7 +191,7 @@ public class LogFilePath {
         if (mGeneration != that.mGeneration) return false;
         if (mKafkaPartition != that.mKafkaPartition) return false;
         if (mOffset != that.mOffset) return false;
-        if (!mPartitions.getPathPartitions().equals(that.mPartitions.getPathPartitions())) return false;
+        if (!mPartitions.equals(that.mPartitions)) return false;
         if (mPrefix != null ? !mPrefix.equals(that.mPrefix) : that.mPrefix != null) return false;
         if (mTopic != null ? !mTopic.equals(that.mTopic) : that.mTopic != null) return false;
 
@@ -202,7 +202,7 @@ public class LogFilePath {
     public int hashCode() {
         int result = mPrefix != null ? mPrefix.hashCode() : 0;
         result = 31 * result + (mTopic != null ? mTopic.hashCode() : 0);
-        result = 31 * result + (mPartitions != null ? mPartitions.getPathPartitions().hashCode() : 0);
+        result = 31 * result + (mPartitions != null ? mPartitions.hashCode() : 0);
         result = 31 * result + mGeneration;
         result = 31 * result + mKafkaPartition;
         result = 31 * result + (int) (mOffset ^ (mOffset >>> 32));
