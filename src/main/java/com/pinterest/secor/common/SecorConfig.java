@@ -21,6 +21,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.configuration.reloading.ReloadingStrategy;
 import org.apache.commons.configuration.FileConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.apache.thrift.TFieldIdEnum;
 
 import java.util.Map;
 import java.util.Properties;
@@ -260,6 +261,23 @@ public class SecorConfig {
         return mProperties.getString("secor.log.file.path.delimiter", "_");
     }
 
+    public ThriftField getMessageTimestampThriftField() {
+      return new ThriftField(
+        getMessageTimestampName(),
+        (short) mProperties.getInt("message.timestamp.thrift.field.id", 1));
+    }
+
+    // Possible values:
+    //  * i64
+    //  * timeuuid
+    public String getMessageTimestampThriftFieldType() {
+      return mProperties.getString("message.timestamp.thrift.field.type", "i64");
+    }
+
+    public String getThriftProtocolName() {
+      return mProperties.getString("thrift.protocol", "TBinaryProtocol");
+    }
+
     private void checkProperty(String name) {
         if (!mProperties.containsKey(name)) {
             throw new RuntimeException("Failed to find required configuration option '" +
@@ -283,5 +301,24 @@ public class SecorConfig {
 
     private String[] getStringArray(String name) {
         return mProperties.getStringArray(name);
+    }
+
+    public class ThriftField implements TFieldIdEnum {
+      private final String mFieldName;
+      private final short mThriftFieldId;
+      public ThriftField(final String fieldName, final short thriftFieldId) {
+        this.mFieldName = fieldName;
+        this.mThriftFieldId = thriftFieldId;
+      }
+
+      @Override
+      public short getThriftFieldId() {
+        return mThriftFieldId;
+      }
+
+      @Override
+      public String getFieldName() {
+        return mFieldName;
+      }
     }
 }
