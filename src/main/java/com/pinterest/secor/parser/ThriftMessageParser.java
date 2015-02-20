@@ -70,7 +70,7 @@ public class ThriftMessageParser extends TimestampedMessageParser {
         super(config);
         try {
           final TProtocolFactory protocolFactory =
-            ((Class<TProtocolFactory>) Class.forName("org.apache.thrift.protocol." + mConfig.getThriftProtocolName() + ".Factory"))
+            ((Class<TProtocolFactory>) Class.forName("org.apache.thrift.protocol." + mConfig.getThriftProtocolName() + "$Factory"))
               .newInstance();
           final TDeserializer deserializer = new TDeserializer(protocolFactory);
           final TFieldIdEnum messageTimestampField = mConfig.getMessageTimestampThriftField();
